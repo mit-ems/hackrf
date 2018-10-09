@@ -24,6 +24,8 @@
 
 #include <libopencm3/lpc43xx/m4/nvic.h>
 
+#include <libopencm3/lpc43xx/wwdt.h>
+
 #include <streaming.h>
 
 #include "tuning.h"
@@ -201,7 +203,15 @@ int main(void) {
 
 	unsigned int phase = 0;
 
+	// Watchdog timer settings
+	WWDT_TC = 1500000; // 0.5 seconds
+	WWDT_MOD = 0x0003; // Enable watchdog and enable reset on timeout
+
 	while(true) {
+		// Reload WWDT register and prevent reset.
+		WWDT_FEED = 0xAA;
+		WWDT_FEED = 0x55;
+
 		// Check whether we need to initiate a CPLD update
 		if (start_cpld_update)
 			cpld_update();
